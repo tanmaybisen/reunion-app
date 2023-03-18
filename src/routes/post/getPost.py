@@ -10,7 +10,7 @@ from auth.auth_handler import decodeJWT
 getPostRouter = APIRouter()
 
 # POST - Get Post
-@getPostRouter.get("/GET api/posts/{id}", tags=['Posts'])
+@getPostRouter.get("/api/posts/{id}", tags=['Posts'])
 async def getPost(id, token: str = Depends(JWTBearer())):
 
     payload = decodeJWT(token)
@@ -18,22 +18,26 @@ async def getPost(id, token: str = Depends(JWTBearer())):
 
     try:
         db=session()
+        
+        post_exists=db.execute(text(f"SELECT COUNT(postid) \
+            FROM posts \
+            WHERE postid={id}")).fetchall()
+        
+        if post_exists[0][0]==0:
+            return JSONResponse(content={'Error':'Post dosen\'t exists'}, status_code=400)
+        
         likes=db.execute(text(f"SELECT COUNT(status) \
             FROM like_dislike \
             WHERE status = 'LIKE' AND postid={id}")).fetchall()
         
-        comments=db.execute(text(f"SELECT commentid, comment \
+        comments=db.execute(text(f"SELECT comment \
             FROM comments \
             WHERE postid = {id} ")).fetchall()
         db.commit()
-        
-        diction_comments=dict()
-        for com in comments:
-            diction_comments[com[0]]=com[1]
             
         return JSONResponse(content={
                 "number of likes":likes[0][0],
-                "comments":diction_comments
+                "comments":[curr[0] for curr in comments]
             }, status_code=200)
     except exc.SQLAlchemyError as e:
         # return {"value":str(e)}

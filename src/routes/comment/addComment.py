@@ -20,6 +20,9 @@ async def commentOnPost(id, comment:CommentAdd, token: str = Depends(JWTBearer()
     userid = payload.get("userid")
     username = payload.get("username")
 
+    if comment.comment=="" or comment.comment==None:
+        return JSONResponse(content={'Abort':'Comment can\'t be empty'}, status_code=400)
+
     try:
         db=session()
         res=db.execute(text(f'INSERT INTO comments \

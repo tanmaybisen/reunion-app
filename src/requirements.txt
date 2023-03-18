@@ -1,0 +1,9 @@
+uvicorn
+fastapi
+pydantic
+PyJWT==2.6.0
+python-decouple==3.7
+pydantic[email]
+FastAPI-SQLAlchemy
+psycopg2-binary
+sentry-sdk
